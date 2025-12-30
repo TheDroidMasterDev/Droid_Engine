@@ -1,0 +1,42 @@
+name: Droid Build Debug
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Instalador Forçado
+        run: |
+          haxelib setup ~/haxelib
+          # Se o instalador normal falhar, o GIT salva
+          haxelib git lime https://github.com/haxelime/lime || haxelib install lime 8.0.1
+          haxelib git openfl https://github.com/openfl/openfl || haxelib install openfl 9.2.1
+          haxelib git flixel https://github.com/HaxeFlixel/flixel || haxelib install flixel 5.2.2
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install tjson --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib run lime setup
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Compilador (A Hora da Verdade)
+        # O -verbose vai cuspir TODO o erro na tela se falhar
+        run: haxelib run lime build android -release -verbose
+
+      - name: Upload (Caso o milagre aconteça)
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: APK-Resultado
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
