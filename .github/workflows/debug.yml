@@ -30,29 +30,25 @@ jobs:
           sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platforms;android-33" "build-tools;33.0.0" "ndk;21.4.7075529"
           echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
 
-      - name: Install Libs (Forçando URL Direta)
+      - name: Install Libs (Sem erros de GIT)
         run: |
           haxelib setup ~/haxelib
+          # Usando o comando nativo do haxelib para evitar erros de clone manual
+          haxelib git lime https://github.com/mcagabe19/lime --always
+          haxelib git openfl https://github.com/openfl/openfl --always
+          haxelib git flixel https://github.com/HaxeFlixel/flixel --always
+          haxelib git linc_luajit https://github.com/nebulatv/linc_luajit --always
+          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
           
-          # Usando token diretamente na URL para evitar erro 128 e GraphQL
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/mcagabe19/lime --depth 1
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/openfl/openfl --depth 1
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/HaxeFlixel/flixel --depth 1
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nebulatv/linc_luajit --depth 1
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/SPLCoding/hxCodec-but-it-works-xd hxCodec --depth 1
-          
-          haxelib dev lime lime
-          haxelib dev openfl openfl
-          haxelib dev flixel flixel
-          haxelib dev linc_luajit linc_luajit
-          haxelib dev hxCodec hxCodec
-          
+          # Instalando o resto
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
           haxelib install SScript --always
-          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools --always
           haxelib run lime setup android
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Lime
         run: |
@@ -60,13 +56,12 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_ROOT
           haxelib run lime config JAVA_HOME $JAVA_HOME
 
-      - name: Compile APK (Port Android)
+      - name: Compile APK
         run: |
           haxelib run lime build android -release
 
       - name: Publish APK
         uses: actions/upload-artifact@v4
         with:
-          name: Port-Android-Finalizado
+          name: Port-Android-Gerado
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-          
