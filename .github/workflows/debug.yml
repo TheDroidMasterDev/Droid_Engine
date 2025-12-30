@@ -30,25 +30,24 @@ jobs:
           sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platforms;android-33" "build-tools;33.0.0" "ndk;21.4.7075529"
           echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
 
-      - name: Install Libs (Sem erros de GIT)
+      - name: Install Libs (Pelo Método Infallível)
         run: |
           haxelib setup ~/haxelib
-          # Usando o comando nativo do haxelib para evitar erros de clone manual
-          haxelib git lime https://github.com/mcagabe19/lime --always
-          haxelib git openfl https://github.com/openfl/openfl --always
-          haxelib git flixel https://github.com/HaxeFlixel/flixel --always
-          haxelib git linc_luajit https://github.com/nebulatv/linc_luajit --always
-          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
-          
-          # Instalando o resto
-          haxelib install flixel-addons --always
+          # Baixando como ZIP para não dar erro de clone ou permissão
+          haxelib install lime 7.9.0 --always
+          haxelib install openfl --always
+          haxelib install flixel 5.2.2 --always
+          haxelib install flixel-addons 3.0.2 --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
           haxelib install SScript --always
+          
+          # Para as que SÓ existem no Git, usamos o link sem a barra final que deu erro no print
+          haxelib git linc_luajit https://github.com/nebulatv/linc_luajit --always
+          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools --always
+          
           haxelib run lime setup android
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Lime
         run: |
@@ -65,3 +64,4 @@ jobs:
         with:
           name: Port-Android-Gerado
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
