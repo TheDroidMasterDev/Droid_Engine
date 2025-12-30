@@ -1,68 +1,74 @@
-name: buildAndroidPort
+name: Build Android Port
 on:
-  workflow_dispatch:
   push:
+    branches: [ main, experimental ]
+  pull_request:
+    branches: [ main, experimental ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  buildAndroid:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r21e
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
+        uses: actions/checkout@v4.1.7
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v1
+        uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.5
+          haxe-version: 4.3.4
 
-      - name: Install Libs (O Fim do Erro de Clone)
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK/NDK
+        uses: android-actions/setup-android@v3
+      
+      - name: Install Android Components
+        run: |
+          sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platforms;android-33" "build-tools;33.0.0" "ndk;25.2.9519653"
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
+
+      - name: Install Haxelib (Modo Blindado)
         run: |
           haxelib setup ~/haxelib
-          
-          # 1. Baixando bibliotecas pesadas via terminal (Inquebrável)
-          git clone https://github.com/mcagabe19/lime --depth 1
-          git clone https://github.com/openfl/openfl --depth 1
-          git clone https://github.com/HaxeFlixel/flixel --depth 1
-          
-          # 2. Corrigindo LuaJit e hxCodec que causaram o seu erro anterior
-          git clone https://github.com/nebulatv/linc_luajit --depth 1
-          git clone https://github.com/SPLCoding/hxCodec-but-it-works-xd --depth 1
-          
-          # 3. Registrando as pastas no Haxe
-          haxelib dev lime lime
-          haxelib dev openfl openfl
-          haxelib dev flixel flixel
-          haxelib dev linc_luajit linc_luajit
-          haxelib dev hxCodec hxCodec-but-it-works-xd
-          
-          # 4. Instalando dependências leves que o servidor aceita
-          haxelib install flixel-addons --always
+          # Instalando as bibliotecas base via ZIP para evitar erro de clone
+          haxelib install hxcpp > /dev/null --quiet
+          haxelib install lime 8.1.2 --always
+          haxelib install openfl 9.3.3 --always
+          haxelib install flixel 5.5.0 --always
+          haxelib install flixel-addons 3.2.1 --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
-          haxelib install SScript 21.0.1 --always
-          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
-          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib install SScript --always
+          
+          # Bibliotecas Git com links corrigidos e sem barra no final
+          haxelib git linc_luajit https://github.com/nebulatv/linc_luajit --always
+          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools --always
+          
+          haxelib run lime setup android
           haxelib run lime setup
 
-      - name: Compilando o Port (Android)
-        # O compilador agora usa os arquivos locais e não trava no download
-        run: haxelib run lime build android -release
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
 
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v3
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+
+      - name: Compile APK
+        run: |
+          haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_ROOT
+          haxelib run lime config JAVA_HOME $JAVA_HOME
+          # Compilando para Android
+          haxelib run lime build android -release -D officialBuild
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
         with:
-          name: Port-Android-Com-Minhas-Funcoes
+          name: androidBuild-PsychPort
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-          
