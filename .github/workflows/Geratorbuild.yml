@@ -1,0 +1,60 @@
+name: buildAndroid
+on: 
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Libs (O Fim do Erro de Clone)
+        run: |
+          haxelib setup ~/haxelib
+          
+          # Baixando as bibliotecas via terminal (muito mais rápido e estável)
+          git clone https://github.com/mcagabe19/lime --depth 1
+          git clone https://github.com/openfl/openfl --depth 1
+          git clone https://github.com/HaxeFlixel/flixel --depth 1
+          
+          # Forçando o Haxe a usar essas pastas baixadas
+          haxelib dev lime lime
+          haxelib dev openfl openfl
+          haxelib dev flixel flixel
+          
+          # Instalando as bibliotecas secundárias que não travam
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install tjson --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib run lime setup
+
+      - name: Compilando APK (Suas Funções)
+        # O compilador agora consegue ler seu código e gerar o arquivo
+        run: haxelib run lime build android -release
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: DroidEngine-Com-Minhas-Funcoes
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
