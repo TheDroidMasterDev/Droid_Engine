@@ -30,32 +30,29 @@ jobs:
           sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platforms;android-33" "build-tools;33.0.0" "ndk;21.4.7075529"
           echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
 
-      - name: Install Libs (Corrigido para Erro 128)
+      - name: Install Libs (Forçando URL Direta)
         run: |
           haxelib setup ~/haxelib
-          # Usando 'gh' para clonar com permissão total do GitHub
-          gh repo clone mcagabe19/lime lime -- --depth 1
-          gh repo clone openfl/openfl openfl -- --depth 1
-          gh repo clone HaxeFlixel/flixel flixel -- --depth 1
-          gh repo clone nebulatv/linc_luajit linc_luajit -- --depth 1
-          gh repo clone SPLCoding/hxCodec-but-it-works-xd hxCodec -- --depth 1
           
-          # Registando as pastas baixadas no Haxelib
+          # Usando token diretamente na URL para evitar erro 128 e GraphQL
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/mcagabe19/lime --depth 1
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/openfl/openfl --depth 1
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/HaxeFlixel/flixel --depth 1
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nebulatv/linc_luajit --depth 1
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/SPLCoding/hxCodec-but-it-works-xd hxCodec --depth 1
+          
           haxelib dev lime lime
           haxelib dev openfl openfl
           haxelib dev flixel flixel
           haxelib dev linc_luajit linc_luajit
           haxelib dev hxCodec hxCodec
           
-          # Instalando dependências que não falham o clone
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
           haxelib install SScript --always
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
           haxelib run lime setup android
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Lime
         run: |
