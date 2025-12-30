@@ -1,0 +1,48 @@
+name: buildAndroid
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Haxelib (MODO TURBO)
+        run: |
+          haxelib setup ~/haxelib
+          # Ignora o arquivo .zip lento e baixa direto do GitHub
+          haxelib git lime https://github.com/mcagabe19/lime
+          haxelib git openfl https://github.com/openfl/openfl
+          haxelib git flixel https://github.com/HaxeFlixel/flixel
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install tjson --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib run lime setup
+
+      - name: Building APK
+        run: haxelib run lime build android -release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: APK-Com-Minhas-Funcoes
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
