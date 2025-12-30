@@ -1,0 +1,39 @@
+name: Droid Build Force
+on: workflow_dispatch # Isso permite que você aperte um botão para iniciar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Libs
+        run: |
+          haxelib install lime 8.0.1
+          haxelib install openfl 9.2.1
+          haxelib install flixel 5.2.2
+          haxelib install flixel-addons
+          haxelib install flixel-ui
+          haxelib install tjson
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib run lime setup flixel
+          haxelib run lime setup
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build
+        run: haxelib run lime build android -release
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: APK-Gerado
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
