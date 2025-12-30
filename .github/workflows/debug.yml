@@ -1,6 +1,7 @@
-name: Build Android Debug
-on:
+name: Droid Build Force 0.7.1h
+on: 
   workflow_dispatch:
+  push:
 
 jobs:
   build:
@@ -13,44 +14,44 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '17' # Obrigatório para Psych 0.7.1h
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@master
+        uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.3.4
+          haxe-version: 4.3.4 # Versão estável para a 0.7.1h
 
-      - name: Install Libs (Modo Debug)
+      - name: Install Libs (Diretórios 2025)
         run: |
           haxelib setup ~/haxelib
-          haxelib install lime --always
-          haxelib install openfl --always
-          haxelib install flixel --always
+          haxelib install lime 8.1.1 --always
+          haxelib install openfl 9.3.3 --always
+          haxelib install flixel 5.5.0 --always
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
           haxelib install SScript --always
           haxelib install hxvlc --always
-          haxelib install hxcpp-debug-server --always
           
-          # Links de 2025 para Debug
+          # Repositórios de Resgate (Substituindo os links mortos)
           haxelib git hxCodec https://github.com/MAJigsaw77-Ports/hxCodec --always
           haxelib git extension-androidtools https://github.com/Shadow-Droid-Team/extension-androidtools --always
           haxelib git androiddialogs https://github.com/Shadow-Droid-Team/androiddialogs --always
           haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit --always
           
+          haxelib run lime setup flixel
           haxelib run lime setup android
           haxelib run lime setup
 
-      - name: Compile Debug APK
-        run: |
-          haxelib run lime build android -debug
-        env:
-          cert_pass: nullfunni
-          cert_alias_pass: nullfunni
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Upload Artifact
+      - name: Build APK (Debug/Release)
+        run: haxelib run lime build android -debug # Mudei para debug como você pediu
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: androidDebug
+          name: DroidEngine-Debug
           path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
+          
