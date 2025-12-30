@@ -1,25 +1,44 @@
-      - name: Install Haxelib
+name: Build Android (Psych 0.7.1h)
+on:
+  workflow_dispatch:
+
+jobs:
+  buildAndroid:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+
+      - name: Install Libs
         run: |
           haxelib setup ~/haxelib
-          haxelib install hxcpp 4.2.1 > /dev/null
-          haxelib install lime 7.9.0
-          haxelib install openfl
-          haxelib --never install flixel 5.2.2
-          haxelib run lime setup flixel
-          haxelib install flixel-tools 1.5.1
-          haxelib install flixel-ui
-          haxelib install flixel-addons 3.0.2
-          haxelib install tjson
-          haxelib install hxjsonast
-          haxelib install SScript
-          
-          # Links de Preservação (Online em Dezembro de 2025)
-          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd.git --always
-          haxelib git linc_luajit https://github.com/Sirox228/linc_luajit --always
+          haxelib install lime --always
+          haxelib install openfl --always
+          haxelib install flixel --always
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install tjson --always
+          haxelib install SScript --always
+          haxelib install hxvlc --always
+          haxelib git hxCodec https://github.com/MAJigsaw77-Ports/hxCodec --always
           haxelib git extension-androidtools https://github.com/Shadow-Droid-Team/extension-androidtools --always
           haxelib git androiddialogs https://github.com/Shadow-Droid-Team/androiddialogs --always
-          haxelib git devicelanguage https://github.com/Shadow-Droid-Team/devicelanguage --always
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit --always
           
-          haxelib install hxcpp-debug-server
-          haxelib list
-          
+          haxelib run lime setup android
+          haxelib run lime setup
+
+      - name: Compile APK
+        run: |
+          haxelib run lime build android -release
