@@ -1,5 +1,7 @@
-name: Droid Build Force
-on: [push, workflow_dispatch]
+name: buildAndroidPort
+on:
+  workflow_dispatch:
+  push:
 
 jobs:
   build:
@@ -8,32 +10,59 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.5
 
-      - name: Install Libs (Turbo Mode)
+      - name: Install Libs (O Fim do Erro de Clone)
         run: |
           haxelib setup ~/haxelib
-          # Isso baixa o LIME em segundos, permitindo que suas funções compilem
-          haxelib git lime https://github.com/haxelime/lime
-          haxelib install openfl 9.2.1 --always
-          haxelib install flixel 5.2.2 --always
+          
+          # 1. Baixando bibliotecas pesadas via terminal (Inquebrável)
+          git clone https://github.com/mcagabe19/lime --depth 1
+          git clone https://github.com/openfl/openfl --depth 1
+          git clone https://github.com/HaxeFlixel/flixel --depth 1
+          
+          # 2. Corrigindo LuaJit e hxCodec que causaram o seu erro anterior
+          git clone https://github.com/nebulatv/linc_luajit --depth 1
+          git clone https://github.com/SPLCoding/hxCodec-but-it-works-xd --depth 1
+          
+          # 3. Registrando as pastas no Haxe
+          haxelib dev lime lime
+          haxelib dev openfl openfl
+          haxelib dev flixel flixel
+          haxelib dev linc_luajit linc_luajit
+          haxelib dev hxCodec hxCodec-but-it-works-xd
+          
+          # 4. Instalando dependências leves que o servidor aceita
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
+          haxelib install SScript 21.0.1 --always
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
           haxelib run lime setup
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-
-      - name: Build APK (Compilando suas funções)
+      - name: Compilando o Port (Android)
+        # O compilador agora usa os arquivos locais e não trava no download
         run: haxelib run lime build android -release
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v3
         with:
-          name: DroidEngine-Com-Minhas-Funcoes
+          name: Port-Android-Com-Minhas-Funcoes
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
