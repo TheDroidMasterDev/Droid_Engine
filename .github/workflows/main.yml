@@ -1,4 +1,4 @@
-name: Build Android com MIDI
+name: Build Droid Engine MIDI
 on:
   push:
     branches: [ "main", "master" ]
@@ -16,32 +16,30 @@ jobs:
         with:
           haxe-version: 4.2.5
 
-      - name: Install Haxelibs (Necessárias para o MIDI)
+      - name: Install Libraries
         run: |
           haxelib install lime
           haxelib install openfl
           haxelib install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib install flixel-tools
           haxelib install flixel-ui
           haxelib install flixel-addons
           haxelib install tjson
-          haxelib install hxvlc
-          haxelib install hxcpp
-          haxelib git linc_luajit https://github.com/nebulazhou/linc_luajit
+          haxelib install SScript
           haxelib git hxCodec https://github.com/polyaneul/hxCodec
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib install androiddialogs
 
       - name: Configure Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Compile APK (Release)
+      - name: Compile APK
         run: haxelib run lime build android -release
 
-      - name: Upload Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: PsychEngine-MIDI-Build
+          name: DroidEngine-MIDI
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-        
+          
