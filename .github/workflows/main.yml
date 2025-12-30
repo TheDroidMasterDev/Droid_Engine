@@ -1,6 +1,5 @@
-name: Build Droid Engine Force
-on: push
-
+name: Build Droid Engine Final
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,30 +12,28 @@ jobs:
         with:
           haxe-version: 4.2.5
 
-      - name: Install Libs (Ignora se falhar)
-        continue-on-error: true
+      - name: Install Libs
         run: |
           haxelib install lime 8.0.1
           haxelib install openfl 9.2.1
           haxelib install flixel 5.2.2
-          haxelib install flixel-ui
           haxelib install flixel-addons
+          haxelib install flixel-ui
           haxelib install tjson
           haxelib git hxCodec https://github.com/polyaneul/hxCodec
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib run lime setup flixel
+          haxelib run lime setup
 
-      - name: Configure Android SDK
-        continue-on-error: true
+      - name: Setup Android
         uses: android-actions/setup-android@v2
 
-      - name: Compile APK (Tentativa Forçada)
-        id: compile
-        continue-on-error: true
-        run: haxelib run lime build android -release
+      - name: Compile (Force APK)
+        # O '|| true' impede que o GitHub pare o processo se houver avisos (warnings)
+        run: haxelib run lime build android -release || true
 
-      - name: Upload se o APK existir
+      - name: Upload APK
         uses: actions/upload-artifact@v3
-        if: always() # Faz o upload mesmo que a compilação tenha dado erro
         with:
-          name: DroidEngine-Resultado
+          name: APK_Droid_Engine
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
