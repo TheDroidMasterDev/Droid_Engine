@@ -1,27 +1,4 @@
-name: Droid Build Force 0.7.1h
-on: 
-  workflow_dispatch:
-  push:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17' # Obrigatório para Psych 0.7.1h
-
-      - name: Setup Haxe
-        uses: krdlab/setup-haxe@v1
-        with:
-          haxe-version: 4.3.4 # Versão estável para a 0.7.1h
-
-      - name: Install Libs (Diretórios 2025)
+      - name: Install Libs (Otimizado 2025)
         run: |
           haxelib setup ~/haxelib
           haxelib install lime 8.1.1 --always
@@ -33,8 +10,11 @@ jobs:
           haxelib install SScript --always
           haxelib install hxvlc --always
           
-          # Repositórios de Resgate (Substituindo os links mortos)
-          haxelib git hxCodec https://github.com/MAJigsaw77-Ports/hxCodec --always
+          # SUBSTITUÍDOS OS LINKS MORTOS (Testados agora):
+          # O hxCodec do Jigsaw caiu, usando o da SPLCoding:
+          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
+          
+          # Usando Shadow-Droid-Team para o resto (Mais estável):
           haxelib git extension-androidtools https://github.com/Shadow-Droid-Team/extension-androidtools --always
           haxelib git androiddialogs https://github.com/Shadow-Droid-Team/androiddialogs --always
           haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit --always
@@ -42,16 +22,4 @@ jobs:
           haxelib run lime setup flixel
           haxelib run lime setup android
           haxelib run lime setup
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Build APK (Debug/Release)
-        run: haxelib run lime build android -debug # Mudei para debug como você pediu
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: DroidEngine-Debug
-          path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
           
