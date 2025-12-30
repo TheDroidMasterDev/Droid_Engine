@@ -1,0 +1,44 @@
+name: Droid Build Force
+on: 
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Libs (Otimizado)
+        run: |
+          # Aumenta a resistência a downloads lentos
+          haxelib setup ~/haxelib
+          haxelib install lime 8.0.1 --always
+          haxelib install openfl 9.2.1 --always
+          haxelib install flixel 5.2.2 --always
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install tjson --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib run lime setup flixel
+          haxelib run lime setup
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build APK
+        # O "|| true" evita que o build pare se houver avisos de download
+        run: haxelib run lime build android -release || true
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: APK-Droid-Engine
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          
