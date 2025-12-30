@@ -31,28 +31,32 @@ jobs:
           echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
 
       - name: Install Libs (O substituto do unish-lib.sh)
+            - name: Install Libs (O substituto do unish-lib.sh)
         run: |
           haxelib setup ~/haxelib
-          # Baixando tudo direto para não depender de scripts externos
-          git clone https://github.com/mcagabe19/lime --depth 1
-          git clone https://github.com/openfl/openfl --depth 1
-          git clone https://github.com/HaxeFlixel/flixel --depth 1
-          git clone https://github.com/nebulatv/linc_luajit --depth 1
-          git clone https://github.com/SPLCoding/hxCodec-but-it-works-xd --depth 1
+          # Usando o comando 'gh' que já vem logado no GitHub Actions
+          gh repo clone mcagabe19/lime lime -- --depth 1
+          gh repo clone openfl/openfl openfl ----depth 1
+          gh repo clone HaxeFlixel/flixel flixel -- --depth 1
+          gh repo clone nebulatv/linc_luajit linc_luajit -- --depth 1
+          gh repo clone SPLCoding/hxCodec-but-it-works-xd hxCodec -- --depth 1
           
+          # Avisando o Haxe para usar as pastas baixadas
           haxelib dev lime lime
           haxelib dev openfl openfl
           haxelib dev flixel flixel
           haxelib dev linc_luajit linc_luajit
-          haxelib dev hxCodec hxCodec-but-it-works-xd
+          haxelib dev hxCodec hxCodec
           
+          # Instalando o resto
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
           haxelib install SScript --always
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
           haxelib run lime setup android
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Essa linha dá a permissão para o clone
       - name: Compile APK
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
