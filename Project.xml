@@ -16,6 +16,9 @@
 	<haxelib name="flixel-ui" />
 	<haxelib name="tjson" />
 	<haxelib name="hscript" />
+	<haxelib name="lime" />
+	<haxelib name="openfl" />
+	<haxelib name="SScript" />
 	<haxelib name="extension-androidtools" if="android"/>
 	<haxelib name="androiddialogs" if="android" />
 
