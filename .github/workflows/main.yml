@@ -1,9 +1,7 @@
 name: Build Android Port
 on:
   push:
-    branches: [ main, experimental ]
-  pull_request:
-    branches: [ main, experimental ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -32,22 +30,23 @@ jobs:
           sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platforms;android-33" "build-tools;33.0.0" "ndk;25.2.9519653"
           echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
 
-      - name: Install Haxelib (Modo Blindado)
+      - name: Install Libs (Link Confirmado pelo Dev)
         run: |
           haxelib setup ~/haxelib
-          # Instalando as bibliotecas base via ZIP para evitar erro de clone
-          haxelib install hxcpp > /dev/null --quiet
-          haxelib install lime 8.1.2 --always
-          haxelib install openfl 9.3.3 --always
-          haxelib install flixel 5.5.0 --always
+          
+          # Usando o novo link oficial do OpenFL/Lime
+          haxelib git lime https://github.com/openfl/lime --always
+          
+          # Outras bibliotecas essenciais que estão online
+          haxelib git openfl https://github.com/openfl/openfl --always
+          haxelib git flixel https://github.com/HaxeFlixel/flixel --always
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
+          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
+          
           haxelib install flixel-addons 3.2.1 --always
           haxelib install flixel-ui --always
           haxelib install tjson --always
-          haxelib install SScript --always
-          
-          # Bibliotecas Git com links corrigidos e sem barra no final
-          haxelib git linc_luajit https://github.com/nebulatv/linc_luajit --always
-          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
+          haxelib install SScript 21.0.1 --always
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools --always
           
           haxelib run lime setup android
@@ -56,15 +55,19 @@ jobs:
       - name: Skip SScript setup mode
         run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
 
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
-
       - name: Compile APK
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_ROOT
           haxelib run lime config JAVA_HOME $JAVA_HOME
-          # Compilando para Android
+          # Comando de build padrão para Psych Engine
+          haxelib run lime build android -release -D officialBuild
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: PsychEngine-AndroidPort
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
           haxelib run lime build android -release -D officialBuild
 
       - name: Publish Artifact
