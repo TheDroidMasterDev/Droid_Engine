@@ -1,0 +1,29 @@
+      - name: Install Libs (O Fim do Erro de Clone)
+        run: |
+          haxelib setup ~/haxelib
+          
+          # Baixando as bibliotecas pesadas via terminal (Inquebrável)
+          git clone https://github.com/mcagabe19/lime --depth 1
+          git clone https://github.com/openfl/openfl --depth 1
+          git clone https://github.com/HaxeFlixel/flixel --depth 1
+          
+          # Corrigindo o erro da LuaJit e hxCodec que travam o clone
+          git clone https://github.com/nebulatv/linc_luajit --depth 1
+          git clone https://github.com/SPLCoding/hxCodec-but-it-works-xd --depth 1
+          
+          # Avisando o Haxe para usar essas pastas
+          haxelib dev lime lime
+          haxelib dev openfl openfl
+          haxelib dev flixel flixel
+          haxelib dev linc_luajit linc_luajit
+          haxelib dev hxCodec hxCodec-but-it-works-xd
+          
+          # Instalando o resto que não depende de clone problemático
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install tjson --always
+          haxelib install SScript 21.0.1 --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
+          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib run lime setup
+          
