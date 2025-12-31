@@ -1,4 +1,4 @@
-name: droid Build Final
+name: Build_Android_2025
 on:
   workflow_dispatch:
 
@@ -20,7 +20,7 @@ jobs:
         with:
           haxe-version: 4.3.4
 
-      - name: Install Libs
+      - name: Install Libraries
         run: |
           haxelib setup ~/haxelib
           haxelib install lime 8.1.1 --always
@@ -29,13 +29,13 @@ jobs:
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install hscript --always
-          haxelib install hxvlc --always
-          haxelib install SScript --always
           haxelib install tjson --always
+          haxelib install SScript --always
+          haxelib install hxvlc --always
+          # SEUS 3 LINKS OK
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
-          haxelib git extension-devicelang https://github.com/Tandest/extension-devicelang --always
 
       - name: Patch
         run: |
@@ -53,14 +53,14 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime setup android -noprompt
 
-      - name: Build
+      - name: Build APK
         run: |
           export ANDROID_SDK=$ANDROID_HOME
           export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk-bundle
           haxelib run lime build android -debug
 
-      - name: Upload
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DroidEngine-APK
+          name: MeuJogoAndroid
           path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
