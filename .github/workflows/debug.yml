@@ -1,4 +1,4 @@
-name: Build_Droid_Final
+name: Build_Android_Final_V4
 on:
   workflow_dispatch:
 
@@ -32,6 +32,8 @@ jobs:
           haxelib install tjson --always
           haxelib install SScript --always
           haxelib install hxvlc --always
+          
+          # OS 3 LINKS QUE VOCÊ VALIDOU
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
@@ -58,9 +60,9 @@ jobs:
           export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk-bundle
           haxelib run lime build android -debug
 
-      - name: Upload
+      - name: Upload (AQUI ESTAVA O ERRO - AGORA É V4)
         uses: actions/upload-artifact@v4
         with:
-          name: Engine-APK
+          name: Engine-Debug-APK
           path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
           
