@@ -1,38 +1,25 @@
-name: Build_Android_Git_Final
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout do Código
-        uses: actions/checkout@v4
-
-      - name: Configurar Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Configurar Haxe
-        uses: krdlab/setup-haxe@v1
-        with:
-          haxe-version: 4.3.4
-
       - name: Instalar Bibliotecas
         run: |
           haxelib setup ~/haxelib
           
-          # BIBLIOTECAS DE SUPORTE (O que estava a faltar)
+          # 1. Suporte
           haxelib install format --always --quiet
           haxelib install hxp --always --quiet
           
-          # Usando Git para estabilidade e os teus links
+          # 2. O PULO DO GATO: Instalação via Servidor Haxelib (Imune a 404)
+          # Se o seu Project.xml pedir "androiddialogs", esse comando resolve:
+          haxelib install androiddialogs --always --quiet
+          
+          # 3. Otimização Lime e OpenFL (Ainda via Git porque estes são estáveis)
           haxelib git lime https://github.com/openfl/lime --always
           haxelib git openfl https://github.com/openfl/openfl --always
           
-          # Bibliotecas base do jogo
+          # 4. Seus 3 links de confiança
+          haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
+          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
+          
+          # 5. Dependências do motor
           haxelib install flixel 5.5.0 --always --quiet
           haxelib install flixel-addons --always --quiet
           haxelib install flixel-ui --always --quiet
@@ -40,29 +27,7 @@ jobs:
           haxelib install tjson --always --quiet
           haxelib install SScript --always --quiet
           haxelib install hxvlc --always --quiet
-          
-          # OS TEUS 3 LINKS ORIGINAIS
-          haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
-          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
-          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
 
-          # Montar as ferramentas do Lime
+          # 6. Rebuild Final
           haxelib run lime rebuild tools --always
-
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Compilar APK
-        run: |
-          haxelib run lime config ANDROID_SDK $ANDROID_HOME
-          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
-          haxelib run lime setup android -noprompt
-          # Build em modo debug com limpeza de cache
-          haxelib run lime build android -debug -clean
-
-      - name: Upload do APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Jogo-Final-Android
-          path: export/**/*.apk
           
