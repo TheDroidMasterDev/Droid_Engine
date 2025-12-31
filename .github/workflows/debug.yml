@@ -29,16 +29,17 @@ jobs:
           haxelib install flixel 5.5.0 --always
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
-          haxelib install tjson --always
-          haxelib install SScript --always
+          haxelib install hscript --always
           haxelib install hxvlc --always
+          haxelib install SScript --always
+          haxelib install tjson --always
           
-          # SEUS 3 LINKS QUE FUNCIONAM
+          # OS 3 LINKS QUE VOCÊ VALIDOU
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
           
-          # REMOVENDO O ANDROIDDIALOGS QUE ESTÁ QUEBRADO
+          # REMOVENDO A DEPENDÊNCIA DO LINK MORTO
           sed -i '/androiddialogs/d' Project.xml
 
       - name: Setup Android SDK
@@ -46,14 +47,12 @@ jobs:
 
       - name: Configure Lime/Android
         run: |
-          # Aqui definimos as rotas que o erro apontou
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime setup android -noprompt
 
       - name: Build APK
-        # Forçamos a leitura das variáveis aqui também
         run: |
           export ANDROID_SDK=$ANDROID_HOME
           export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk-bundle
