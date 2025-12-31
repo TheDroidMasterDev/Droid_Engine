@@ -24,14 +24,15 @@ jobs:
         run: |
           haxelib setup ~/haxelib
           
-          # BIBLIOTECA QUE FALTOU:
+          # BIBLIOTECAS DE SUPORTE (O que estava a faltar)
           haxelib install format --always --quiet
+          haxelib install hxp --always --quiet
           
-          # Usando Git para estabilidade
+          # Usando Git para estabilidade e os teus links
           haxelib git lime https://github.com/openfl/lime --always
           haxelib git openfl https://github.com/openfl/openfl --always
           
-          # Bibliotecas base
+          # Bibliotecas base do jogo
           haxelib install flixel 5.5.0 --always --quiet
           haxelib install flixel-addons --always --quiet
           haxelib install flixel-ui --always --quiet
@@ -40,12 +41,12 @@ jobs:
           haxelib install SScript --always --quiet
           haxelib install hxvlc --always --quiet
           
-          # SEUS 3 LINKS ORIGINAIS
+          # OS TEUS 3 LINKS ORIGINAIS
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
 
-          # Rebuild necessário para o Lime Git
+          # Montar as ferramentas do Lime
           haxelib run lime rebuild tools --always
 
       - name: Configurar Android SDK
@@ -56,7 +57,7 @@ jobs:
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime setup android -noprompt
-          # Build em modo debug
+          # Build em modo debug com limpeza de cache
           haxelib run lime build android -debug -clean
 
       - name: Upload do APK
