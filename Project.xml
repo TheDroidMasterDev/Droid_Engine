@@ -2,7 +2,7 @@
 <project>
 	<app title="Psych Engine Droid" file="PsychEngine" packageName="com.shadowmario.psychengine" package="com.shadowmario.psychengine" main="Main" version="0.2.8" company="ShadowMario" />
 
-	<window width="1280" height="720" fps="" background="#000000" hardware="true" vsync="false" />
+	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
 	<window if="mobile" orientation="landscape" fullscreen="true" width="1280" height="720" resizable="false"/>
 
 	<classpath name="source" />
@@ -19,6 +19,9 @@
 	<haxelib name="lime" />
 	<haxelib name="openfl" />
 	<haxelib name="extension-androidtools" if="android"/>
+	
+	<haxedef name="no-android-dialogs" if="android" />
+	<haxedef name="no-device-lang" if="android" />
 
 	<config:android permission="android.permission.READ_EXTERNAL_STORAGE" if="android"/>
 	<config:android permission="android.permission.WRITE_EXTERNAL_STORAGE" if="android"/>
