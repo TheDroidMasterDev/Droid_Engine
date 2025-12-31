@@ -1,44 +1,55 @@
-name: Droid Build Force
-on: 
+name: Build_Sem_Erro_V4
+on:
   workflow_dispatch:
-  push:
 
 jobs:
-  build:
+  job_de_compilacao:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Passo_1_Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Haxe
+      - name: Passo_2_Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Passo_3_Haxe
         uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.2.5
+          haxe-version: 4.3.4
 
-      - name: Install Libs (Versões Estáveis)
+      - name: Passo_4_Bibliotecas
         run: |
           haxelib setup ~/haxelib
-          haxelib install lime 8.0.1 --always
-          haxelib install openfl 9.2.1 --always
-          haxelib install flixel 5.2.2 --always
+          haxelib install lime 8.1.1 --always
+          haxelib install openfl 9.3.3 --always
+          haxelib install flixel 5.5.0 --always
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
+          haxelib install hscript --always
           haxelib install tjson --always
           haxelib install SScript --always
-          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
-          haxelib run lime setup flixel
-          haxelib run lime setup
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-
-      - name: Build APK
-        # O "|| true" tenta garantir o upload mesmo se houver avisos não fatais
-        run: haxelib run lime build android -release || true
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: APK-Droid-Engine-Final
-          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          haxelib install hxvlc --always
           
+          # SEUS 3 LINKS QUE FUNCIONAM
+          haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
+          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
+
+      - name: Passo_5_Android_SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Passo_6_Build
+        run: |
+          haxelib run lime config ANDROID_SDK $ANDROID_HOME
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
+          haxelib run lime setup android -noprompt
+          haxelib run lime build android -debug
+
+      - name: Passo_7_Upload_Final
+        uses: actions/upload-artifact@v4
+        with:
+          name: APK_Final
+          path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
