@@ -1,4 +1,4 @@
-name: Build_Android_Nova
+name: Build_Android_Final_2025
 on:
   workflow_dispatch:
 
@@ -6,37 +6,56 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: krdlab/setup-haxe@v1
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.3.4
 
-      - name: Libs
+      - name: Instalar Todas as Libs
         run: |
           haxelib setup ~/haxelib
+          # Versões específicas para evitar conflitos
           haxelib install lime 8.1.1 --always
           haxelib install openfl 9.3.3 --always
           haxelib install flixel 5.5.0 --always
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install hscript --always
+          # INSTALANDO AS QUE DERAM ERRO:
+          haxelib install tjson --always
+          haxelib install SScript --always
+          haxelib install hxvlc --always
+          
+          # SEUS 3 LINKS QUE FUNCIONAM:
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
 
-      - name: Build
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configurar e Build
         run: |
+          # Configuração manual para garantir que o Lime encontre os caminhos
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
+          haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime setup android -noprompt
+          # O comando de build
           haxelib run lime build android -debug
 
-      - name: Upload
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: APK-Sucesso
+          name: Engine-APK-Resultado
           path: export/**/*.apk
+          
