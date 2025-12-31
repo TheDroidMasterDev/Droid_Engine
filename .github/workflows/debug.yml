@@ -23,21 +23,30 @@ jobs:
       - name: Instalar Bibliotecas
         run: |
           haxelib setup ~/haxelib
-          # Instala o básico que seu XML pede
-          haxelib install lime --always
-          haxelib install openfl --always
-          haxelib install flixel 5.2.2 --always
-          haxelib install flixel-addons --always
-          haxelib install flixel-ui --always
-          haxelib install hscript --always
-          haxelib install tjson --always
+          haxelib install lime --always --quiet
+          haxelib install openfl --always --quiet
+          haxelib install flixel 5.2.2 --always --quiet
+          haxelib install flixel-addons --always --quiet
+          haxelib install flixel-ui --always --quiet
+          haxelib install hscript --always --quiet
+          haxelib install tjson --always --quiet
+          haxelib install SScript --always --quiet
+          haxelib install hxvlc --always --quiet
           
-          # Seus 3 links de confiança (incluindo o androidtools do seu XML)
+          # Seus 3 links de confiança
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools --always
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           
           haxelib run lime rebuild tools --always
+
+      - name: Limpar Código (Remover imports fantasmas)
+        run: |
+          # Este comando comenta a linha que causa o erro da DeviceLanguage no import.hx
+          sed -i 's/import extension.devicelang.DeviceLanguage;/\/\/ import extension.devicelang.DeviceLanguage;/g' source/import.hx
+          
+          # Este comando remove referências à androiddialogs que o log acusou
+          sed -i 's/import extension.androiddialogs.AndroidDialogs;/\/\/ import extension.androiddialogs.AndroidDialogs;/g' source/backend/AndroidDialogsExtend.hx || true
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -47,6 +56,5 @@ jobs:
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime setup android -noprompt
-          # Forçando o compilador a ignorar as classes que faltam
+          # Flags extras para ignorar erros de biblioteca
           haxelib run lime build android -debug -clean -D no-android-dialogs -D no-device-lang
-          
