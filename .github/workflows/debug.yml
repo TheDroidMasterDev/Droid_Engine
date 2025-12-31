@@ -1,5 +1,5 @@
 name: Droid Build Final
-on: 
+on:
   workflow_dispatch:
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
         with:
           haxe-version: 4.3.4
 
-      - name: Install Libraries
+      - name: Install Libs
         run: |
           haxelib setup ~/haxelib
           haxelib install lime 8.1.1 --always
@@ -37,31 +37,27 @@ jobs:
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
           haxelib git extension-devicelang https://github.com/Tandest/extension-devicelang --always
 
-      - name: Patch Files
+      - name: Patch
         run: |
-          # Remove a linha do androiddialogs do Project.xml para não travar
           sed -i '/androiddialogs/d' Project.xml || true
-          # Desativa o import que estava dando erro
-          sed -i 's/import extension.devicelang.DeviceLanguage;/\/\/import extension.devicelang.DeviceLanguage;/g' source/import.hx || true
-          # Cria um arquivo falso para enganar o compilador onde faltar o AndroidDialogs
           mkdir -p source/backend
           echo "package backend; class AndroidDialogsExtend { public static function open(t:String, m:String) {} }" > source/backend/AndroidDialogsExtend.hx
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Configure Lime
+      - name: Config Lime
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime setup android -noprompt
 
-      - name: Build APK
+      - name: Build
         run: |
           export ANDROID_SDK=$ANDROID_HOME
           export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk-bundle
-          haxelib run lime build android -debug --app-version="1.0.0"
+          haxelib run lime build android -debug
 
       - name: Upload
         uses: actions/upload-artifact@v4
