@@ -1,4 +1,4 @@
-name: Droid Build Final
+name: droid Build Final
 on:
   workflow_dispatch:
 
