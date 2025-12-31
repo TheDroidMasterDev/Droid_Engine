@@ -1,4 +1,4 @@
-name: Build_Android_2025
+name: Build_Android_Git_Final
 on:
   workflow_dispatch:
 
@@ -6,47 +6,61 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout do Código
         uses: actions/checkout@v4
 
-      - name: Configurar Java e Haxe
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: krdlab/setup-haxe@v1
+
+      - name: Configurar Haxe
+        uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.3.4
 
-      - name: Instalar Bibliotecas
+      - name: Instalar Bibliotecas (Via Git Oficial)
         run: |
           haxelib setup ~/haxelib
-          haxelib install lime 8.1.1 --always
-          haxelib install openfl 9.3.3 --always
-          haxelib install flixel 5.5.0 --always
-          haxelib install flixel-addons --always
-          haxelib install flixel-ui --always
-          haxelib install hscript --always
-          haxelib install tjson --always
-          haxelib install SScript --always
-          haxelib install hxvlc --always
+          
+          # Usando Git para evitar o travamento de 0%
+          haxelib git lime https://github.com/openfl/lime --always
+          haxelib git openfl https://github.com/openfl/openfl --always
+          
+          # Bibliotecas base do Flixel
+          haxelib install flixel 5.5.0 --always --quiet
+          haxelib install flixel-addons --always --quiet
+          haxelib install flixel-ui --always --quiet
+          haxelib install hscript --always --quiet
+          
+          # Bibliotecas que estavam faltando
+          haxelib install tjson --always --quiet
+          haxelib install SScript --always --quiet
+          haxelib install hxvlc --always --quiet
+          
+          # OS SEUS 3 LINKS QUE FUNCIONAM
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
 
-      - name: Setup Android
+          # NECESSÁRIO PARA QUEM USA LIME VIA GIT:
+          haxelib run lime rebuild tools --always
+
+      - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Compilar APK
+      - name: Compilar APK (Modo Clean)
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime setup android -noprompt
-          haxelib run lime build android -debug
+          # O comando -clean garante que não haja lixo de builds antigos
+          haxelib run lime build android -debug -clean
 
-      - name: Enviar Arquivo
+      - name: Upload do APK
         uses: actions/upload-artifact@v4
         with:
-          name: Jogo-Android
+          name: Jogo-Final-Git
           path: export/**/*.apk
           
