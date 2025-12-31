@@ -62,6 +62,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: DroidEngine
+          name: DroidEngine-APK
           path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
-          
