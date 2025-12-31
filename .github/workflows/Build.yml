@@ -1,0 +1,63 @@
+name: Build_Total_2025
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.4
+
+      - name: Instalar Bibliotecas
+        run: |
+          haxelib setup ~/haxelib
+          haxelib install lime 8.1.1 --always
+          haxelib install openfl 9.3.3 --always
+          haxelib install flixel 5.5.0 --always
+          haxelib install flixel-addons --always
+          haxelib install flixel-ui --always
+          haxelib install hscript --always
+          haxelib install tjson --always
+          haxelib install SScript --always
+          haxelib install hxvlc --always
+          
+          # SEUS 3 LINKS QUE ESTÃO OK
+          haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
+          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
+
+      - name: Patch de Erros
+        run: |
+          sed -i '/androiddialogs/d' Project.xml || true
+          mkdir -p source/backend
+          echo "package backend; class AndroidDialogsExtend { public static function open(t:String, m:String) {} }" > source/backend/AndroidDialogsExtend.hx
+
+      - name: Configurar Android
+        uses: android-actions/setup-android@v3
+
+      - name: Build do APK
+        run: |
+          haxelib run lime config ANDROID_SDK $ANDROID_HOME
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
+          haxelib run lime setup android -noprompt
+          haxelib run lime build android -debug
+
+      - name: Encontrar e Enviar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jogo-Android-Debug
+          # O segredo: esse comando pega qualquer APK gerado no projeto todo
+          path: "**/*.apk"
+          if-no-files-found: error
