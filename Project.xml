@@ -19,7 +19,6 @@
 	<haxelib name="lime" />
 	<haxelib name="openfl" />
 	<haxelib name="extension-androidtools" if="android"/>
-	<haxelib name="androiddialogs" if="android" />
 
 	<config:android permission="android.permission.READ_EXTERNAL_STORAGE" if="android"/>
 	<config:android permission="android.permission.WRITE_EXTERNAL_STORAGE" if="android"/>
