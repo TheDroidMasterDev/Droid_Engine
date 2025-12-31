@@ -1,4 +1,4 @@
-name: Build_Android_Nova
+name: Build_Android_2025
 on:
   workflow_dispatch:
 
@@ -6,8 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Java e Haxe
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -15,7 +18,7 @@ jobs:
         with:
           haxe-version: 4.3.4
 
-      - name: Libs
+      - name: Instalar Bibliotecas
         run: |
           haxelib setup ~/haxelib
           haxelib install lime 8.1.1 --always
@@ -24,19 +27,26 @@ jobs:
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
           haxelib install hscript --always
+          haxelib install tjson --always
+          haxelib install SScript --always
+          haxelib install hxvlc --always
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
           haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
 
-      - name: Build
+      - name: Setup Android
+        uses: android-actions/setup-android@v3
+
+      - name: Compilar APK
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime setup android -noprompt
           haxelib run lime build android -debug
 
-      - name: Upload
+      - name: Enviar Arquivo
         uses: actions/upload-artifact@v4
         with:
-          name: APK-Sucesso
+          name: Jogo-Android
           path: export/**/*.apk
+          
