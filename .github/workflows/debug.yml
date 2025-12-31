@@ -26,17 +26,17 @@ jobs:
           haxelib install format --always --quiet
           haxelib install hxp --always --quiet
           
-          # Otimização via Git
+          # LIME E OPENFL
           haxelib git lime https://github.com/openfl/lime --always
           haxelib git openfl https://github.com/openfl/openfl --always
           
-          # Seus 3 links de confiança
+          # OS TEUS 3 LINKS DE CONFIANÇA
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
           haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
-          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools --always
           
-          # Outras bibliotecas (SEM AndroidDialogs para não dar 404)
-          haxelib install flixel 5.5.0 --always --quiet
+          # DEPENDÊNCIAS DO MOTOR (Versão estável)
+          haxelib install flixel 5.2.2 --always --quiet
           haxelib install flixel-addons --always --quiet
           haxelib install flixel-ui --always --quiet
           haxelib install hscript --always --quiet
@@ -46,17 +46,18 @@ jobs:
           
           haxelib run lime rebuild tools --always
 
-      - name: Configurar Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Compilar APK
+      - name: Build APK (Com Flags de Ignorar Erros)
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
           haxelib run lime setup android -noprompt
-          haxelib run lime build android -debug -clean
+          # O PULO DO GATO: As flags abaixo ignoram as libs que deram 404
+          haxelib run lime build android -debug -clean -D NO_PRECOMPILED_HEADERS -D no-android-dialogs -D no-device-lang
 
-      - name: Enviar APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Jogo-Android
