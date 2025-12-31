@@ -1,44 +1,72 @@
-name: Droid Build Force
-on: 
+name: Droid Build Final
+on:
   workflow_dispatch:
-  push:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.2.5
+          haxe-version: 4.3.4
 
-      - name: Install Libs (Direto do GitHub - Sem Trava)
+      - name: Install Libs
         run: |
           haxelib setup ~/haxelib
-          # Baixando direto do GitHub para não travar em 0%
-          haxelib git lime https://github.com/haxelime/lime
-          haxelib install openfl 9.2.1 --always
-          haxelib install flixel 5.2.2 --always
+          haxelib install lime 8.1.1 --always
+          haxelib install openfl 9.3.3 --always
+          haxelib install flixel 5.5.0 --always
           haxelib install flixel-addons --always
           haxelib install flixel-ui --always
-          haxelib install tjson --always
+          haxelib install hscript --always
+          haxelib install hxvlc --always
           haxelib install SScript --always
-          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools
-          haxelib run lime setup flixel
-          haxelib run lime setup
+          haxelib install tjson --always
+          
+          # SEUS 3 LINKS QUE FUNCIONAM:
+          haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
+          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
+          
+          # CORREÇÃO DE IDIOMA:
+          haxelib git extension-devicelang https://github.com/Tandest/extension-devicelang --always
+
+      - name: Patch Code
+        run: |
+          sed -i '/androiddialogs/d' Project.xml || true
+          mkdir -p source/backend
+          echo "package backend; class AndroidDialogsExtend { public static function open(t:String, m:String) {} }" > source/backend/AndroidDialogsExtend.hx
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
+
+      - name: Config Lime
+        run: |
+          haxelib run lime config ANDROID_SDK $ANDROID_HOME
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk-bundle
+          haxelib run lime config JAVA_HOME $JAVA_HOME
+          haxelib run lime setup android -noprompt
 
       - name: Build APK
-        run: haxelib run lime build android -release
+        run: |
+          export ANDROID_SDK=$ANDROID_HOME
+          export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk-bundle
+          haxelib run lime build android -debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: DroidEngine-APK
-          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          name: DroidEngine-Build
+          path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
           
