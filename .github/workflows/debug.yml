@@ -21,7 +21,7 @@ jobs:
         with:
           haxe-version: 4.3.4
 
-      - name: Install Libs (Diretórios 2025)
+      - name: Install Libs (Apenas os Links que Prestam)
         run: |
           haxelib setup ~/haxelib
           haxelib install lime 8.1.1 --always
@@ -33,11 +33,14 @@ jobs:
           haxelib install SScript --always
           haxelib install hxvlc --always
           
-          # Links corrigidos para 2025
-          haxelib git hxCodec https://github.com/SPLCoding/hxCodec-but-it-works-xd --always
-          haxelib git extension-androidtools https://github.com/Shadow-Droid-Team/extension-androidtools --always
-          haxelib git androiddialogs https://github.com/Shadow-Droid-Team/androiddialogs --always
-          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit --always
+          # OS 3 LINKS QUE VOCÊ VALIDOU:
+          haxelib git hxCodec https://github.com/polybiusproxy/hxCodec --always
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit --always
+          haxelib git extension-androidtools https://github.com/LimeExtensions/extension-androidtools --always
+          
+          # COMANDO PARA REMOVER A NECESSIDADE DO ANDROIDDIALOGS NO PROJECT.XML
+          # Isso evita que o build quebre por causa do link morto
+          sed -i '/androiddialogs/d' Project.xml
           
           haxelib run lime setup flixel
           haxelib run lime setup android
@@ -46,7 +49,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build APK (Debug/Release)
+      - name: Build APK
         run: haxelib run lime build android -debug
 
       - name: Upload APK
@@ -54,4 +57,3 @@ jobs:
         with:
           name: DroidEngine-Debug
           path: export/debug/android/bin/app/build/outputs/apk/debug/*.apk
-          
